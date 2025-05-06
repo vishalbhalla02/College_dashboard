@@ -5,15 +5,18 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import { baseApiURL } from "../baseUrl";
+
 const Login = () => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState("Student");
   const { register, handleSubmit } = useForm();
+
   const onSubmit = (data) => {
-    if (data.login !== "" && data.password !== "") {
+    if (data.loginid !== "" && data.password !== "") {
       const headers = {
         "Content-Type": "application/json",
       };
+
       axios
         .post(`${baseApiURL()}/${selected.toLowerCase()}/auth/login`, data, {
           headers: headers,
@@ -28,9 +31,9 @@ const Login = () => {
           console.error(error);
           toast.error(error.response.data.message);
         });
-    } else {
     }
   };
+
   return (
     <div className="bg-white h-[100vh] w-full flex justify-between items-center">
       <img
@@ -70,10 +73,6 @@ const Login = () => {
               {...register("password")}
             />
           </div>
-          {/* <div className="flex w-[70%] mt-3 justify-start items-center">
-            <input type="checkbox" id="remember" className="accent-blue-500" />{" "}
-            Remember Me
-          </div> */}
           <button className="bg-blue-500 mt-5 text-white px-6 py-2 text-xl rounded-md hover:bg-blue-700 ease-linear duration-300 hover:ease-linear hover:duration-300 hover:transition-all transition-all flex justify-center items-center">
             Login
             <span className="ml-2">
@@ -106,6 +105,14 @@ const Login = () => {
           onClick={() => setSelected("Admin")}
         >
           Admin
+        </button>
+        <button
+          className={`text-blue-500 mr-6 text-base font-semibold hover:text-blue-700 ease-linear duration-300 hover:ease-linear hover:duration-300 hover:transition-all transition-all ${
+            selected === "Lab Assistant" && "border-b-2 border-green-500"
+          }`}
+          onClick={() => setSelected("Lab Assistant")}
+        >
+          Lab Assistant
         </button>
       </div>
       <Toaster position="bottom-center" />

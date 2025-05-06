@@ -18,7 +18,9 @@ const AddStudent = () => {
     semester: "",
     branch: "",
     gender: "",
+    labGroup: "", // <-- Add this
   });
+
   const getBranchData = () => {
     const headers = {
       "Content-Type": "application/json",
@@ -51,9 +53,12 @@ const AddStudent = () => {
   const addStudentProfile = (e) => {
     e.preventDefault();
     toast.loading("Adding Student");
+
     const headers = {
       "Content-Type": "multipart/form-data",
     };
+
+    // Create FormData and append the fields
     const formData = new FormData();
     formData.append("enrollmentNo", data.enrollmentNo);
     formData.append("firstName", data.firstName);
@@ -64,8 +69,11 @@ const AddStudent = () => {
     formData.append("semester", data.semester);
     formData.append("branch", data.branch);
     formData.append("gender", data.gender);
+    formData.append("labGroup", data.labGroup); // Added LabGroup to FormData
     formData.append("type", "profile");
     formData.append("profile", file);
+
+    // Send POST request with the form data
     axios
       .post(`${baseApiURL()}/student/details/addDetails`, formData, {
         headers: headers,
@@ -74,6 +82,8 @@ const AddStudent = () => {
         toast.dismiss();
         if (response.data.success) {
           toast.success(response.data.message);
+
+          // After successful student addition, register the student
           axios
             .post(`${baseApiURL()}/student/auth/register`, {
               loginid: data.enrollmentNo,
@@ -83,6 +93,7 @@ const AddStudent = () => {
               toast.dismiss();
               if (response.data.success) {
                 toast.success(response.data.message);
+                // Reset the form and states after successful registration
                 setFile();
                 setData({
                   enrollmentNo: "",
@@ -95,6 +106,7 @@ const AddStudent = () => {
                   branch: "",
                   gender: "",
                   profile: "",
+                  labGroup: "", // Reset labGroup as well
                 });
                 setPreviewImage();
               } else {
@@ -233,6 +245,25 @@ const AddStudent = () => {
           })}
         </select>
       </div>
+      <div className="w-[40%]">
+        <label htmlFor="labGroup" className="leading-7 text-sm">
+          Select Lab Group
+        </label>
+        <select
+          id="labGroup"
+          value={data.labGroup}
+          onChange={(e) => setData({ ...data, labGroup: e.target.value })}
+          className="w-full bg-blue-50 rounded border focus:border-dark-green focus:bg-secondary-light focus:ring-2 focus:ring-light-green text-base outline-none py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+        >
+          <option value="" disabled>
+            -- Select Lab Group --
+          </option>
+          <option value="P1">P1</option>
+          <option value="P2">P2</option>
+          <option value="P3">P3</option>
+        </select>
+      </div>
+
       <div className="w-[40%]">
         <label htmlFor="gender" className="leading-7 text-sm ">
           Select Gender

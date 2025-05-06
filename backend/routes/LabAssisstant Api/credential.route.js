@@ -4,7 +4,7 @@ const {
   registerHandler,
   updateHandler,
   deleteHandler,
-} = require("../../controllers/Faculty/credential.controller.js");
+} = require("../../controllers/LabAssisstant/credentail.controller");
 const router = express.Router();
 
 router.post("/login", loginHandler);

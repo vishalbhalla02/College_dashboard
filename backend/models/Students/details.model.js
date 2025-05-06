@@ -5,6 +5,7 @@ const studentDetails = new mongoose.Schema(
     enrollmentNo: {
       type: Number,
       required: true,
+      unique: true,
     },
     firstName: {
       type: String,
@@ -30,6 +31,10 @@ const studentDetails = new mongoose.Schema(
       required: true,
     },
     branch: {
+      type: String,
+      required: true,
+    },
+    labGroup: {
       type: String,
       required: true,
     },

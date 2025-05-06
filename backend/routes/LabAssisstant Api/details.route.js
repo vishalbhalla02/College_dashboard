@@ -6,7 +6,7 @@ const {
   updateDetails,
   deleteDetails,
   getCount,
-} = require("../../controllers/Faculty/details.controller.js");
+} = require("../../controllers/LabAssisstant/details.controller.js");
 const upload = require("../../middlewares/multer.middleware.js");
 
 router.post("/getDetails", getDetails);

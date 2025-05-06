@@ -24,10 +24,12 @@ app.use("/media", express.static(path.join(__dirname, "media")));
 app.use("/api/student/auth", require("./routes/Student Api/credential.route"));
 app.use("/api/faculty/auth", require("./routes/Faculty Api/credential.route"));
 app.use("/api/admin/auth", require("./routes/Admin Api/credential.route"));
+app.use("/api/la/auth", require("./routes/Faculty Api/credential.route"));
 // Details Apis
 app.use("/api/student/details", require("./routes/Student Api/details.route"));
 app.use("/api/faculty/details", require("./routes/Faculty Api/details.route"));
 app.use("/api/admin/details", require("./routes/Admin Api/details.route"));
+app.use("/api/la/details", require("./routes/Faculty Api/details.route"));
 // Other Apis
 app.use("/api/timetable", require("./routes/Other Api/timetable.route"));
 app.use("/api/material", require("./routes/Other Api/material.route"));

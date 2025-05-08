@@ -5,6 +5,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import { baseApiURL } from "../baseUrl";
+import bvcoeImage from "./../components/image.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -38,8 +39,8 @@ const Login = () => {
     <div className="bg-white h-[100vh] w-full flex justify-between items-center">
       <img
         className="w-[60%] h-[100vh] object-cover"
-        src="https://media.licdn.com/dms/image/v2/C511BAQE4zfI-ltxZAA/company-background_10000/company-background_10000/0/1584495633253/bvcoedelhi_cover?e=1746529200&v=beta&t=1Pr_mNyJowPtYzCxZGUqEcjjH9C-0bVo2JWc1BTLV6o"
-        alt=""
+        src={bvcoeImage}
+        alt="BVCOE"
       />
       <div className="w-[40%] flex justify-center items-start flex-col pl-8">
         <p className="text-3xl font-semibold pb-2 border-b-2 border-green-500">

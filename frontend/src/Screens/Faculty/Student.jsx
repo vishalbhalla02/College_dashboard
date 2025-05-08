@@ -124,11 +124,6 @@ const Student = () => {
                 </p>
               </div>
             </div>
-            <img
-              src={process.env.REACT_APP_MEDIA_LINK + "/" + data.profile}
-              alt="student profile"
-              className="h-[200px] w-[200px] object-cover rounded-lg shadow-md"
-            />
           </div>
         )}
       </div>

@@ -2,12 +2,10 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { baseApiURL } from "../../../baseUrl";
-import { FiUpload } from "react-icons/fi";
 
 const AddStudent = () => {
-  const [file, setFile] = useState();
-  const [branch, setBranch] = useState();
-  const [previewImage, setPreviewImage] = useState("");
+  const [branch, setBranch] = useState([]);
+  const [batch, setBatch] = useState([]);
   const [data, setData] = useState({
     enrollmentNo: "",
     firstName: "",
@@ -18,16 +16,37 @@ const AddStudent = () => {
     semester: "",
     branch: "",
     gender: "",
-    labGroup: "", // <-- Add this
+    labGroup: "",
+    batch: "",
   });
 
+  const getBatchData = () => {
+    console.log("Fetching batch data...");
+    axios
+      .get(`${baseApiURL()}/batch/getBatch`)
+      .then((response) => {
+        console.log("Batch data response:", response.data);
+        if (response.data.success) {
+          setBatch(response.data.batches);
+        } else {
+          toast.error(response.data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching batch data:", error);
+        toast.error("Failed to fetch batch data");
+      });
+  };
+
   const getBranchData = () => {
+    console.log("Fetching branch data...");
     const headers = {
       "Content-Type": "application/json",
     };
     axios
       .get(`${baseApiURL()}/branch/getBranch`, { headers })
       .then((response) => {
+        console.log("Branch data response:", response.data);
         if (response.data.success) {
           setBranch(response.data.branches);
         } else {
@@ -35,55 +54,34 @@ const AddStudent = () => {
         }
       })
       .catch((error) => {
-        console.error(error);
+        console.error("Error fetching branch data:", error);
+        toast.error("Failed to fetch branch data");
       });
   };
 
   useEffect(() => {
     getBranchData();
+    getBatchData();
   }, []);
-
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
-    const imageUrl = URL.createObjectURL(selectedFile);
-    setPreviewImage(imageUrl);
-  };
 
   const addStudentProfile = (e) => {
     e.preventDefault();
     toast.loading("Adding Student");
-
+    console.log(data);
     const headers = {
-      "Content-Type": "multipart/form-data",
+      "Content-Type": "application/json",
     };
 
-    // Create FormData and append the fields
-    const formData = new FormData();
-    formData.append("enrollmentNo", data.enrollmentNo);
-    formData.append("firstName", data.firstName);
-    formData.append("middleName", data.middleName);
-    formData.append("lastName", data.lastName);
-    formData.append("email", data.email);
-    formData.append("phoneNumber", data.phoneNumber);
-    formData.append("semester", data.semester);
-    formData.append("branch", data.branch);
-    formData.append("gender", data.gender);
-    formData.append("labGroup", data.labGroup); // Added LabGroup to FormData
-    formData.append("type", "profile");
-    formData.append("profile", file);
-
-    // Send POST request with the form data
     axios
-      .post(`${baseApiURL()}/student/details/addDetails`, formData, {
+      .post(`${baseApiURL()}/student/details/addDetails`, data, {
         headers: headers,
       })
       .then((response) => {
         toast.dismiss();
+        console.log("Add student response:", response.data);
         if (response.data.success) {
           toast.success(response.data.message);
 
-          // After successful student addition, register the student
           axios
             .post(`${baseApiURL()}/student/auth/register`, {
               loginid: data.enrollmentNo,
@@ -91,10 +89,9 @@ const AddStudent = () => {
             })
             .then((response) => {
               toast.dismiss();
+              console.log("Student registration response:", response.data);
               if (response.data.success) {
                 toast.success(response.data.message);
-                // Reset the form and states after successful registration
-                setFile();
                 setData({
                   enrollmentNo: "",
                   firstName: "",
@@ -105,16 +102,16 @@ const AddStudent = () => {
                   semester: "",
                   branch: "",
                   gender: "",
-                  profile: "",
-                  labGroup: "", // Reset labGroup as well
+                  batch: "",
+                  labGroup: "",
                 });
-                setPreviewImage();
               } else {
                 toast.error(response.data.message);
               }
             })
             .catch((error) => {
               toast.dismiss();
+              console.error("Error registering student:", error);
               toast.error(error.response.data.message);
             });
         } else {
@@ -123,6 +120,7 @@ const AddStudent = () => {
       })
       .catch((error) => {
         toast.dismiss();
+        console.error("Error adding student:", error);
         toast.error(error.response.data.message);
       });
   };
@@ -226,6 +224,25 @@ const AddStudent = () => {
         </select>
       </div>
       <div className="w-[40%]">
+        <label htmlFor="batch" className="leading-7 text-sm">
+          Select Batch
+        </label>
+        <select
+          id="batch"
+          value={data.batch}
+          onChange={(e) => setData({ ...data, batch: e.target.value })}
+          className="w-full bg-blue-50 rounded border focus:border-dark-green focus:bg-secondary-light focus:ring-2 focus:ring-light-green text-base outline-none py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+        >
+          <option value="">-- Select Batch --</option>
+          {batch.map((b) => (
+            <option key={b._id} value={b.batch}>
+              {b.batch}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="w-[40%]">
         <label htmlFor="branch" className="leading-7 text-sm ">
           Select Branch
         </label>
@@ -279,32 +296,7 @@ const AddStudent = () => {
           <option value="Female">Female</option>
         </select>
       </div>
-      <div className="w-[40%]">
-        <label htmlFor="file" className="leading-7 text-sm ">
-          Select Profile
-        </label>
-        <label
-          htmlFor="file"
-          className="px-2 bg-blue-50 py-3 rounded-sm text-base w-full flex justify-center items-center cursor-pointer"
-        >
-          Upload
-          <span className="ml-2">
-            <FiUpload />
-          </span>
-        </label>
-        <input
-          hidden
-          type="file"
-          id="file"
-          accept="image/*"
-          onChange={handleFileChange}
-        />
-      </div>
-      {previewImage && (
-        <div className="w-full flex justify-center items-center">
-          <img src={previewImage} alt="student" className="h-36" />
-        </div>
-      )}
+
       <button
         type="submit"
         className="bg-blue-500 px-6 py-3 rounded-sm mb-6 text-white"

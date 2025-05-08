@@ -8,13 +8,16 @@ import { baseApiURL } from "../../baseUrl";
 const Marks = () => {
   const [subject, setSubject] = useState();
   const [branch, setBranch] = useState();
+  const [batch, setBatch] = useState();
   const [studentData, setStudentData] = useState();
   const [selected, setSelected] = useState({
     branch: "",
     semester: "",
     subject: "",
     examType: "",
+    batch: "",
   });
+
   const loadStudentDetails = () => {
     const headers = {
       "Content-Type": "application/json",
@@ -22,7 +25,11 @@ const Marks = () => {
     axios
       .post(
         `${baseApiURL()}/student/details/getDetails`,
-        { branch: selected.branch, semester: selected.semester },
+        {
+          branch: selected.branch,
+          semester: selected.semester,
+          batch: selected.batch,
+        },
         { headers }
       )
       .then((response) => {
@@ -97,6 +104,22 @@ const Marks = () => {
       });
   };
 
+  const getBatchData = () => {
+    axios
+      .get(`${baseApiURL()}/batch/getBatch`)
+      .then((response) => {
+        if (response.data.success) {
+          setBatch(response.data.batches);
+        } else {
+          toast.error("Failed to fetch batch data");
+        }
+      })
+      .catch((err) => {
+        console.error("Batch API Error:", err);
+        toast.error(err.message);
+      });
+  };
+
   const getSubjectData = () => {
     toast.loading("Loading Subjects");
     axios
@@ -117,6 +140,7 @@ const Marks = () => {
 
   useEffect(() => {
     getBranchData();
+    getBatchData(); // Include batch data on mount
     getSubjectData();
   }, []);
 
@@ -140,16 +164,18 @@ const Marks = () => {
           </button>
         )}
       </div>
+
       {!studentData && (
         <>
-          <div className="mt-10 w-full flex justify-evenly items-center gap-x-6">
-            <div className="w-full">
+          <div className="mt-10 w-full flex justify-evenly items-center gap-x-6 flex-wrap">
+            {/* Branch Dropdown */}
+            <div className="w-full sm:w-[30%]">
               <label htmlFor="branch" className="leading-7 text-base ">
                 Select Branch
               </label>
               <select
                 id="branch"
-                className="px-2 bg-blue-50 py-3 rounded-sm text-base w-full accent-blue-700 mt-1"
+                className="px-2 bg-blue-50 py-3 rounded-sm text-base w-full mt-1"
                 value={selected.branch}
                 onChange={(e) =>
                   setSelected({ ...selected, branch: e.target.value })
@@ -157,45 +183,69 @@ const Marks = () => {
               >
                 <option defaultValue>-- Select --</option>
                 {branch &&
-                  branch.map((branch) => {
-                    return (
-                      <option value={branch.name} key={branch.name}>
-                        {branch.name}
-                      </option>
-                    );
-                  })}
+                  branch.map((b) => (
+                    <option value={b.name} key={b.name}>
+                      {b.name}
+                    </option>
+                  ))}
               </select>
             </div>
-            <div className="w-full">
+
+            {/* Semester Dropdown */}
+            <div className="w-full sm:w-[30%]">
               <label htmlFor="semester" className="leading-7 text-base ">
                 Select Semester
               </label>
               <select
                 id="semester"
-                className="px-2 bg-blue-50 py-3 rounded-sm text-base w-full accent-blue-700 mt-1"
+                className="px-2 bg-blue-50 py-3 rounded-sm text-base w-full mt-1"
                 value={selected.semester}
                 onChange={(e) =>
                   setSelected({ ...selected, semester: e.target.value })
                 }
               >
                 <option defaultValue>-- Select --</option>
-                <option value="1">1st Semester</option>
-                <option value="2">2nd Semester</option>
-                <option value="3">3rd Semester</option>
-                <option value="4">4th Semester</option>
-                <option value="5">5th Semester</option>
-                <option value="6">6th Semester</option>
-                <option value="7">7th Semester</option>
-                <option value="8">8th Semester</option>
+                {[...Array(8)].map((_, i) => (
+                  <option value={i + 1} key={i + 1}>
+                    {i + 1} Semester
+                  </option>
+                ))}
               </select>
             </div>
-            <div className="w-full">
+
+            {/* Batch Dropdown */}
+            <div className="w-full sm:w-[30%]">
+              <label htmlFor="batch" className="leading-7 text-base ">
+                Select Batch
+              </label>
+              <select
+                id="batch"
+                className="px-2 bg-blue-50 py-3 rounded-sm text-base w-full mt-1"
+                value={selected.batch}
+                onChange={(e) =>
+                  setSelected({ ...selected, batch: e.target.value })
+                }
+              >
+                <option defaultValue>-- Select --</option>
+                {batch &&
+                  batch.map((b) => {
+                    return (
+                      <option value={b.batch} key={b._id}>
+                        {b.batch}
+                      </option>
+                    );
+                  })}
+              </select>
+            </div>
+
+            {/* Subject Dropdown */}
+            <div className="w-full sm:w-[30%]">
               <label htmlFor="subject" className="leading-7 text-base ">
                 Select Subject
               </label>
               <select
                 id="subject"
-                className="px-2 bg-blue-50 py-3 rounded-sm text-base w-full accent-blue-700 mt-1"
+                className="px-2 bg-blue-50 py-3 rounded-sm text-base w-full mt-1"
                 value={selected.subject}
                 onChange={(e) =>
                   setSelected({ ...selected, subject: e.target.value })
@@ -203,22 +253,22 @@ const Marks = () => {
               >
                 <option defaultValue>-- Select --</option>
                 {subject &&
-                  subject.map((subject) => {
-                    return (
-                      <option value={subject.name} key={subject.name}>
-                        {subject.name}
-                      </option>
-                    );
-                  })}
+                  subject.map((s) => (
+                    <option value={s.name} key={s.name}>
+                      {s.name}
+                    </option>
+                  ))}
               </select>
             </div>
-            <div className="w-full">
+
+            {/* Exam Type Dropdown */}
+            <div className="w-full sm:w-[30%]">
               <label htmlFor="examType" className="leading-7 text-base ">
                 Select Exam Type
               </label>
               <select
                 id="examType"
-                className="px-2 bg-blue-50 py-3 rounded-sm text-base w-full accent-blue-700 mt-1"
+                className="px-2 bg-blue-50 py-3 rounded-sm text-base w-full mt-1"
                 value={selected.examType}
                 onChange={(e) =>
                   setSelected({ ...selected, examType: e.target.value })
@@ -230,6 +280,7 @@ const Marks = () => {
               </select>
             </div>
           </div>
+
           <button
             className="bg-blue-50 px-4 py-2 mt-8 mx-auto rounded border-2 border-blue-500 text-black"
             onClick={loadStudentDetails}
@@ -238,35 +289,34 @@ const Marks = () => {
           </button>
         </>
       )}
+
       {studentData && studentData.length !== 0 && (
         <>
           <p className="mt-4 text-lg">
             Upload {selected.examType} Marks Of {selected.branch} Semester{" "}
-            {selected.semester} of {selected.subject}
+            {selected.semester} - {selected.subject}
           </p>
           <div
             className="w-full flex flex-wrap justify-center items-center mt-8 gap-4"
             id="markContainer"
           >
-            {studentData.map((student) => {
-              return (
-                <div
-                  key={student.enrollmentNo}
-                  className="w-[30%] flex justify-between items-center border-2 border-blue-500 rounded"
-                  id={student.enrollmentNo}
-                >
-                  <p className="text-lg px-4 w-1/2 bg-blue-50">
-                    {student.enrollmentNo}
-                  </p>
-                  <input
-                    type="number"
-                    className="px-6 py-2 focus:ring-0 outline-none w-1/2"
-                    placeholder="Enter Marks"
-                    id={`${student.enrollmentNo}marks`}
-                  />
-                </div>
-              );
-            })}
+            {studentData.map((student) => (
+              <div
+                key={student.enrollmentNo}
+                className="w-[30%] flex justify-between items-center border-2 border-blue-500 rounded"
+                id={student.enrollmentNo}
+              >
+                <p className="text-lg px-4 w-1/2 bg-blue-50">
+                  {student.enrollmentNo}
+                </p>
+                <input
+                  type="number"
+                  className="px-6 py-2 focus:ring-0 outline-none w-1/2"
+                  placeholder="Enter Marks"
+                  id={`${student.enrollmentNo}marks`}
+                />
+              </div>
+            ))}
           </div>
           <button
             className="bg-blue-500 px-6 py-3 mt-8 mx-auto rounded text-white"

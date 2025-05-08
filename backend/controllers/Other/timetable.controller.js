@@ -2,11 +2,11 @@ const Timetable = require("../../models/Other/timetable.model");
 
 const getTimetable = async (req, res) => {
   try {
-    const timetable = await Timetable.find(); // No filter = get all
+    const timetable = await Timetable.find(); // Get all timetables
     if (timetable.length > 0) {
       res.status(200).json(timetable);
     } else {
-      res.status(200).json([]); // Send empty array with 200 OK
+      res.status(200).json([]); // Send empty array
     }
   } catch (error) {
     console.error(error);
@@ -15,31 +15,33 @@ const getTimetable = async (req, res) => {
 };
 
 const addTimetable = async (req, res) => {
-  let { semester, branch } = req.body;
+  let { semester, branch, batch } = req.body; // Destructure batch
+
   try {
-    let timetable = await Timetable.findOne({ semester, branch });
+    let timetable = await Timetable.findOne({ semester, branch, batch }); // Include batch in query
+
     if (timetable) {
       await Timetable.findByIdAndUpdate(timetable._id, {
         semester,
         branch,
+        batch,
         link: req.file.filename,
       });
-      const data = {
+      return res.json({
         success: true,
         message: "Timetable Updated!",
-      };
-      res.json(data);
+      });
     } else {
       await Timetable.create({
         semester,
         branch,
+        batch,
         link: req.file.filename,
       });
-      const data = {
+      return res.json({
         success: true,
         message: "Timetable Added!",
-      };
-      res.json(data);
+      });
     }
   } catch (error) {
     console.log(error);
@@ -55,11 +57,10 @@ const deleteTimetable = async (req, res) => {
         .status(400)
         .json({ success: false, message: "No Timetable Exists!" });
     }
-    const data = {
+    return res.json({
       success: true,
       message: "Timetable Deleted!",
-    };
-    res.json(data);
+    });
   } catch (error) {
     console.error(error.message);
     console.log(error);

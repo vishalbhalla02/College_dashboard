@@ -14,13 +14,33 @@ const GoogleClassroomLinks = () => {
     semester: "",
     link: "",
     faculty: "",
+    batch: "",
   });
   const [branch, setBranch] = useState([]);
+  const [batch, setBatch] = useState([]);
 
   useEffect(() => {
     getBranchData();
+    getBatchData();
     // Optionally, you can also fetch semester data here if needed
   }, []);
+  const getBatchData = () => {
+    axios
+      .get(`${baseApiURL()}/batch/getBatch`, {
+        headers: { "Content-Type": "application/json" },
+      })
+      .then((response) => {
+        if (response.data.success) {
+          setBatch(response.data.batches);
+        } else {
+          toast.error(response.data.message || "Failed to fetch batches");
+        }
+      })
+      .catch((error) => {
+        console.error("Batch error:", error);
+        toast.error(error.message);
+      });
+  };
 
   const getBranchData = () => {
     axios
@@ -131,6 +151,19 @@ const GoogleClassroomLinks = () => {
             {branch.map((b) => (
               <option value={b.name} key={b.name}>
                 {b.name}
+              </option>
+            ))}
+          </select>
+          <select
+            name="batch"
+            value={formData.batch}
+            onChange={handleChange}
+            className="px-4 py-2 w-[80%] bg-blue-50 rounded-sm my-2"
+          >
+            <option value="">Select Batch</option>
+            {batch.map((b) => (
+              <option key={b._id} value={b.batch}>
+                {b.batch}
               </option>
             ))}
           </select>

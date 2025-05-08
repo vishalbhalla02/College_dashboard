@@ -119,6 +119,22 @@ const Profile = () => {
               <p className="text-lg font-normal mb-2">
                 Department: {data[0].department}
               </p>
+              <p className="text-lg font-normal mb-2">
+                Branches:
+                <ul className="list-disc list-inside ml-4">
+                  {data[0].branches.map((branch, index) => (
+                    <li key={index}>{branch}</li>
+                  ))}
+                </ul>
+              </p>
+              <p className="text-lg font-normal mb-2">
+                Lab Groups:
+                <ul className="list-disc list-inside ml-4">
+                  {data[0].labGroups.map((labGroups, index) => (
+                    <li key={index}>{labGroups}</li>
+                  ))}
+                </ul>
+              </p>
             </div>
             <button
               className={`${
@@ -161,11 +177,6 @@ const Profile = () => {
               </form>
             )}
           </div>
-          <img
-            src={process.env.REACT_APP_MEDIA_LINK + "/" + data[0].profile}
-            alt="faculty profile"
-            className="h-[200px] w-[200px] object-cover rounded-lg shadow-md"
-          />
         </>
       )}
     </div>

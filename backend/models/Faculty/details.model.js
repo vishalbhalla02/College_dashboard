@@ -41,10 +41,16 @@ const facultyDetails = new mongoose.Schema(
       type: String,
       required: true,
     },
-    profile: {
-      type: String,
-      required: true,
-    },
+    branches: [
+      {
+        type: String,
+      },
+    ],
+    labGroups: [
+      {
+        type: String,
+      },
+    ],
   },
   { timestamps: true }
 );

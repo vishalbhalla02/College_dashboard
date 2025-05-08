@@ -11,23 +11,24 @@ const Timetable = () => {
   const [addselected, setAddSelected] = useState({
     branch: "",
     semester: "",
+    batch: "",
   });
   const [file, setFile] = useState(null);
   const [branch, setBranch] = useState([]);
+  const [batches, setBatches] = useState([]);
   const [previewUrl, setPreviewUrl] = useState("");
   const [selected, setSelected] = useState("add");
   const [timetables, setTimetables] = useState([]);
 
   useEffect(() => {
     getBranchData();
+    getBatchData();
     getTimetableHandler();
   }, []);
 
   const getBranchData = () => {
     axios
-      .get(`${baseApiURL()}/branch/getBranch`, {
-        headers: { "Content-Type": "application/json" },
-      })
+      .get(`${baseApiURL()}/branch/getBranch`)
       .then((response) => {
         if (response.data.success) {
           setBranch(response.data.branches);
@@ -41,6 +42,22 @@ const Timetable = () => {
       });
   };
 
+  const getBatchData = () => {
+    axios
+      .get(`${baseApiURL()}/batch/getBatch`)
+      .then((response) => {
+        if (response.data.success) {
+          setBatches(response.data.batches);
+        } else {
+          toast.error(response.data.message || "Failed to fetch batches");
+        }
+      })
+      .catch((error) => {
+        console.error("Batch fetch error:", error);
+        toast.error(error.message);
+      });
+  };
+
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
@@ -48,7 +65,12 @@ const Timetable = () => {
   };
 
   const addTimetableHandler = () => {
-    if (!addselected.branch || !addselected.semester || !file) {
+    if (
+      !addselected.branch ||
+      !addselected.semester ||
+      !addselected.batch ||
+      !file
+    ) {
       toast.error("All fields and file are required.");
       return;
     }
@@ -57,6 +79,7 @@ const Timetable = () => {
     const formData = new FormData();
     formData.append("branch", addselected.branch);
     formData.append("semester", addselected.semester);
+    formData.append("batch", addselected.batch);
     formData.append("type", "timetable");
     formData.append("timetable", file);
 
@@ -68,7 +91,7 @@ const Timetable = () => {
         toast.dismiss();
         if (response.data.success) {
           toast.success(response.data.message);
-          setAddSelected({ branch: "", semester: "" });
+          setAddSelected({ branch: "", semester: "", batch: "" });
           setFile(null);
           setPreviewUrl("");
           getTimetableHandler();
@@ -90,8 +113,7 @@ const Timetable = () => {
         if (Array.isArray(response.data) && response.data.length > 0) {
           setTimetables(response.data);
         } else {
-          setTimetables([]); // Ensure state consistency
-
+          setTimetables([]);
           toast.error("No timetables found");
         }
       })
@@ -100,11 +122,6 @@ const Timetable = () => {
         toast.error(error.message);
       });
   };
-
-  useEffect(() => {
-    if (timetables.length > 0) {
-    }
-  }, [timetables]);
 
   const deleteTimetableHandler = (id) => {
     toast.loading("Deleting Timetable...");
@@ -145,7 +162,7 @@ const Timetable = () => {
             } border-blue-500 px-4 py-2 text-black rounded-sm`}
             onClick={() => {
               setSelected("view");
-              getTimetableHandler(); // Ensure refresh
+              getTimetableHandler();
             }}
           >
             View Timetables
@@ -159,7 +176,6 @@ const Timetable = () => {
             <p className="mb-4 text-xl font-medium">Add Timetable</p>
 
             <select
-              id="branch"
               className="px-2 bg-blue-50 py-3 rounded-sm text-base w-[80%] mt-4"
               value={addselected.branch}
               onChange={(e) =>
@@ -175,7 +191,6 @@ const Timetable = () => {
             </select>
 
             <select
-              id="semester"
               className="px-2 bg-blue-50 py-3 rounded-sm text-base w-[80%] mt-4"
               value={addselected.semester}
               onChange={(e) =>
@@ -186,6 +201,21 @@ const Timetable = () => {
               {[...Array(8)].map((_, i) => (
                 <option key={i + 1} value={i + 1}>
                   {i + 1} Semester
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="px-2 bg-blue-50 py-3 rounded-sm text-base w-[80%] mt-4"
+              value={addselected.batch}
+              onChange={(e) =>
+                setAddSelected({ ...addselected, batch: e.target.value })
+              }
+            >
+              <option value="">-- Select Batch --</option>
+              {batches.map((b) => (
+                <option value={b.batch} key={b._id}>
+                  {b.batch}
                 </option>
               ))}
             </select>
@@ -259,14 +289,14 @@ const Timetable = () => {
                   src={
                     tt?.link && process.env.REACT_APP_MEDIA_LINK
                       ? `${process.env.REACT_APP_MEDIA_LINK}/${tt.link}`
-                      : "/path/to/default-image.jpg" // Optional fallback image if no image is provided
+                      : "/path/to/default-image.jpg"
                   }
                   alt="Timetable"
                   className="w-full h-64 object-contain mb-4"
                 />
 
                 <p className="font-semibold">
-                  {tt.branch} - Semester {tt.semester}
+                  {tt.branch} - Semester {tt.semester} - Batch {tt.batch}
                 </p>
               </div>
             ))
